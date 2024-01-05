@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drag and Drop Text File Reader</title>
+<style>
+    #dropZone {
+        border: 2px dashed #0087F7;
+        border-radius: 5px;
+        padding: 50px;
+        text-align: center;
+        margin: 20px;
+    }
+
+    .output {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-top: 20px;
+        height: 300px;
+        overflow-y: scroll;
+    }
+
+    .container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .container > div {
+        width: 48%;
+    }
+</style>
+</head>
+<body>
+
+<div id="dropZone">Drag and drop a text file here</div>
+<div class="container">
+    <div id="aToE" class="output">A to E</div>
+    <div id="everythingElse" class="output">Everything Else</div>
+</div>
+
+<script>
+    function handleFileSelect(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        var file = evt.dataTransfer.files[0]; // FileList object.
+
+        // Only process text files.
+        if (!file.type.match('text.*')) {
+            return;
+        }
+
+        var reader = new FileReader();
+
+        reader.onload = (function(theFile) {
+            return function(e) {
+                // Replace commas with comma followed by a line break
+                var contentWithBreaks = e.target.result.replace(/,/g, ',\n');
+
+                // Split the contents by line
+                var lines = contentWithBreaks.split(/\r\n|\n/);
+                var aToEContent = "";
+                var everythingElseContent = "";
+
+                // Process each line
+                lines.forEach(function(line) {
+				    var trimmedLine = line.trim(); // Trim whitespace from the beginning and end of the line
+					
+                    // Check if the line starts with A-E (case insensitive)
+                    if (/^[a-eA-E]/.test(trimmedLine)) {
+                        aToEContent += trimmedLine + '<br><br>';
+                    } else {
+                        everythingElseContent += trimmedLine + '<br><br>';
+                    }
+                });
+
+                // Render file contents in respective sections.
+                document.getElementById('aToE').innerHTML = aToEContent;
+                document.getElementById('everythingElse').innerHTML = everythingElseContent;
+            };
+        })(file);
+
+        // Read in the file as text.
+        reader.readAsText(file);
+    }
+
+    function handleDragOver(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+    }
+
+    // Setup the drag and drop listeners.
+    var dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', handleDragOver, false);
+    dropZone.addEventListener('drop', handleFileSelect, false);
+</script>
+
+</body>
+</html>
