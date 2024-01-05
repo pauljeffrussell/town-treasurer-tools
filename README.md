@@ -10,8 +10,11 @@ Tools for common town treasury data parsing that run completely in the users web
 The OpenGov Munis import file has a bonkers format. I mean it's CSV, but it looks like this:
 
 H,0,04222022,P Russell,,5555,E-23-758,MS,,3
+
 D,B110,210,Electrical,,,,,,0
+
 H,0,04232023,Q Smith,,,FMKT-23-64,MS,,4
+
 D,H110,75,Farmer's M,,,,,,0
 
 The issue is that these files often combine a bunch of rows for different types of payments on different dates. Which is just weird. What is even stranger is that when you try to import this information into Munis, Munis expects:
