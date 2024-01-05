@@ -3,108 +3,312 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Drag and Drop Text File Reader</title>
+<title>Town Treasurer Tools</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <style>
-    #dropZone {
-        border: 2px dashed #0087F7;
-        border-radius: 5px;
-        padding: 50px;
-        text-align: center;
-        margin: 20px;
-    }
 
-    .output {
-        border: 1px solid #ddd;
-        padding: 10px;
-        margin-top: 20px;
-        height: 300px;
-        overflow-y: scroll;
-    }
+	
+	#dropZone {
+	    border: 2px dashed #0087F7;
+	    border-radius: 5px;
+	    padding: 50px;
+	    text-align: center;
+	    margin: 20px auto; /* Center the drop zone */
+	    max-width: 60%; /* Set a max width */
+	    background-color: #F0F0F0; /* Default background color */
+	    transition: background-color 0.3s; /* Optional: for a smooth color transition */
 
-    .container {
-        display: flex;
-        justify-content: space-between;
-    }
+	}
 
-    .container > div {
-        width: 48%;
-    }
+	h1 {
+	    text-align: center;
+	    margin-top: 0;
+	}
 
-    h1 {
-        text-align: center;
-        margin-top: 0;
-    }
+	/* Center the button */
+	#toggleContentBtn {
+	    display: block;
+	    margin: 20px auto; /* Center the button */
+	    padding: 10px 20px; /* Optional: Adjust padding for better button size */
+	}
+
+	/* Container for both groups */
+	.output-container {
+	    max-width: 100%; /* Match the width with dropZone */
+	    margin: 0 auto; /* Center the container */
+	    display: flex;
+	    justify-content: space-between;
+	}
+
+	/* Individual group container */
+	.group {
+	    width: 50%; /* Adjust the width as needed */
+	}
+
+	.group-title {
+	    font-weight: bold;
+	    margin-bottom: 10px;
+	    text-align: center;
+		color:green;
+	}
+
+	.group-container {
+	    margin: 10px;
+	    padding: 10px;
+	    border: 1px solid #ddd;
+	    text-align: left;
+	}
+
+	.group-container pre {
+	    text-align: left;
+	    white-space: pre-wrap;
+	}
+
+	.link-container {
+	    margin-bottom: 10px; /* Adjust as needed for space between links */
+	}
+
+	.content-div {
+	    display: none; /* Hide content by default */
+	}
+
+	#metricsContainer {
+	    display: none;
+	}
+
+	.download-links a {
+	    display: block;
+	    margin: 10px 0;
+	}
+
+	.download-links div {
+	    margin-top: 10px;
+	    margin-bottom: 20px;
+	    padding: 10px;
+	    border: 1px solid #ddd;
+	    background-color: #f9f9f9;
+	}
+
+	.download-link {
+	    color: blue; /* Initial link color */
+	    text-decoration: none; /* Optional: Removes underline from links */
+	}
+	
+	#toggleContentBtn, #metricsContainer, .output-container {
+	    display: none; /* Hide these elements initially */
+	}
+	
 </style>
 </head>
 <body>
 
 <h1>Town Treasurer Tools</h1>
 
-<div id="dropZone">Drag and drop a text file here</div>
-<div class="container">
-    <div id="aToE" class="output">A to E</div>
-    <div id="everythingElse" class="output">Everything Else</div>
+<div id="dropZone">Drag and drop an OpenGov Munis import file here</div>
+
+<button id="toggleContentBtn">Show File Contents</button>
+
+
+
+<div id="outputContainer" class="output-container">
+	
+<div id="metricsContainer"></div>
+	
+<div class="group">
+    <div class="group-title">Cash & Checks</div>
+    <div id="group3Container" class="group-container"></div>
+</div>
+
+<div class="group">
+    <div class="group-title">E-Checks</div>
+    <div id="group4Container" class="group-container"></div>
 </div>
 
 
-
+</div>
 <script>
-    function handleFileSelect(evt) {
-        evt.stopPropagation();
-        evt.preventDefault();
+ 
+	   function handleFileSelect(evt) {
+	       evt.stopPropagation();
+	       evt.preventDefault();
 
-        var file = evt.dataTransfer.files[0]; // FileList object.
+	       var file = evt.dataTransfer.files[0]; // FileList object.
 
-        // Only process text files.
-        if (!file.type.match('text.*')) {
-            return;
-        }
+	       if (!file.type.match('text.*')) {
+	           alert('Please upload a text-based file.');
+	           return;
+	       }
 
-        var reader = new FileReader();
+	       var reader = new FileReader();
+	       var totalCount = 0;
+	       var unaddedCount = 0;
+	       var group3Count = 0;
+	       var group4Count = 0;
+	       var groupData = {
+	           '3': {},
+	           '4': {}
+	       };
 
-        reader.onload = (function(theFile) {
-            return function(e) {
-                // Replace commas with comma followed by a line break
-                var contentWithBreaks = e.target.result.replace(/,/g, ',\n');
+	       reader.onload = function(e) {
+	           var lines = e.target.result.split(/\r\n|\n/);
+	           totalCount = lines.length;
+	           var lastLine = null;
 
-                // Split the contents by line
-                var lines = contentWithBreaks.split(/\r\n|\n/);
-                var aToEContent = "";
-                var everythingElseContent = "";
+	           lines.forEach(function(line, index) {
+	               if (lastLine && (lastLine.endsWith('3') || lastLine.endsWith('4'))) {
+	                   var date = formatDate(lastLine.split(',')[2]); // Date from the matching row
+	                   var groupType = lastLine.endsWith('3') ? '3' : '4';
+					   var amount = parseFloat(line.split(',')[2]) || 0; // Amount from the following row
+	                   if (!groupData[groupType][date]) {
+	                       groupData[groupType][date] = {
+	                           lines: [],
+	                           total: 0
+	                       };
+	                   }
+	                   groupData[groupType][date].lines.push(lastLine + '\n' + line);
+					   groupData[groupType][date].total += amount;
+						
+	                   if (groupType === '3') group3Count += 2;
+	                   else if (groupType === '4') group4Count += 2;
+	               } else {
+	                   unaddedCount += 1;
+	               }
+	               lastLine = line;
+	           });
 
-                // Process each line
-                lines.forEach(function(line) {
-				    var trimmedLine = line.trim(); // Trim whitespace from the beginning and end of the line
-					
-                    // Check if the line starts with A-E (case insensitive)
-                    if (/^[a-eA-E]/.test(trimmedLine)) {
-                        aToEContent += trimmedLine + '<br><br>';
-                    } else {
-                        everythingElseContent += trimmedLine + '<br><br>';
-                    }
-                });
+	           displayMetrics(totalCount, unaddedCount, group3Count, group4Count, groupData);
+	           createDownloadLinks(groupData['3'], 'CC', 'group3Container');
+	           createDownloadLinks(groupData['4'], 'echeck', 'group4Container');
+	       };
 
-                // Render file contents in respective sections.
-                document.getElementById('aToE').innerHTML = aToEContent;
-                document.getElementById('everythingElse').innerHTML = everythingElseContent;
-            };
-        })(file);
+	       reader.readAsText(file);
+		   document.getElementById('toggleContentBtn').style.display = 'block';
+		   //document.getElementById('metricsContainer').style.display = 'block';
+		   document.querySelector('.output-container').style.display = 'flex';
+	   }
 
-        // Read in the file as text.
-        reader.readAsText(file);
+	   function displayMetrics(total, unadded, group3, group4, groupData) {
+	       var metricsContainer = document.getElementById('metricsContainer');
+	       metricsContainer.innerHTML = `
+	           <p>Total number of rows: ${total}</p>
+	           <p>Rows added to Group 3 files: ${group3}</p>
+	           <p>Rows added to Group 4 files: ${group4}</p>
+	           <p>Total number of Group 3 files: ${Object.keys(groupData['3']).length}</p>
+	           <p>Total number of Group 4 files: ${Object.keys(groupData['4']).length}</p>
+	       `;
+	   }
+
+	   function createDownloadLinks(groupedByDate, transactionType) {
+	       var container = transactionType === 'CC' ? document.getElementById('group3Container') : document.getElementById('group4Container');
+	       container.innerHTML = '';
+
+	       Object.keys(groupedByDate).forEach(function(date) {
+	           var dateData = groupedByDate[date];
+	           var blob = new Blob([dateData.lines.join('\n')], { type: 'text/csv' });
+	           var url = URL.createObjectURL(blob);
+	           var fileName = date + '_' + transactionType + '_$' + dateData.total.toFixed(2) + '.csv';
+
+			   var linkContainer = document.createElement('div');
+			   linkContainer.className = 'link-container';
+
+	           var link = document.createElement('a');
+	           link.href = url;
+	           link.download = fileName;
+	           link.textContent = fileName;
+	           link.className = 'download-link'; // Add class for styling
+
+	           link.addEventListener('click', function() {
+	               link.style.color = 'green'; // Change color after clicking
+	               var downloadedText = document.createElement('span');
+	               downloadedText.textContent = ' Downloaded!';
+	               downloadedText.style.color = 'green';
+	               downloadedText.style.fontWeight = 'bold';
+	               link.parentNode.insertBefore(downloadedText, link.nextSibling);
+	               link.removeEventListener('click', arguments.callee);
+	           });
+
+			   linkContainer.appendChild(link);
+
+	           var contentDiv = document.createElement('pre');
+	           contentDiv.textContent = dateData.lines.join('\n');
+	           contentDiv.className = 'content-div';
+	           contentDiv.style.display = 'none'; // Initially hide the content
+	           linkContainer.appendChild(contentDiv);
+
+	           container.appendChild(linkContainer);
+	       });
+	   }
+  
+
+
+    function formatDate(dateString) {
+        var month = dateString.substring(0, 2);
+        var day = dateString.substring(2, 4);
+        var year = dateString.substring(4, 8);
+        return year + month + day;
     }
 
     function handleDragOver(evt) {
         evt.stopPropagation();
         evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+        evt.dataTransfer.dropEffect = 'copy';
     }
 
-    // Setup the drag and drop listeners.
     var dropZone = document.getElementById('dropZone');
     dropZone.addEventListener('dragover', handleDragOver, false);
     dropZone.addEventListener('drop', handleFileSelect, false);
+	
+	
+	document.getElementById('toggleContentBtn').addEventListener('click', function() {
+	    var contentDivs = document.getElementsByClassName('content-div');
+	    var isContentVisible = false; // Flag to track content visibility
+
+	    // Toggle visibility for each content div
+	    for (var i = 0; i < contentDivs.length; i++) {
+	        var display = contentDivs[i].style.display;
+	        if (display !== 'none') {
+	            isContentVisible = true;
+	        }
+	        contentDivs[i].style.display = display === 'none' ? 'block' : 'none';
+	    }
+
+	    // Update button text based on content visibility
+	    if (isContentVisible) {
+	        this.textContent = 'Show File Contents';
+	    } else {
+	        this.textContent = 'Hide File Contents';
+	    }
+	});
+	
+	
+	var dropZone = document.getElementById('dropZone');
+	var originalText = dropZone.textContent;  // Store the original text
+
+	dropZone.addEventListener('dragover', function(e) {
+	    e.preventDefault();  // Prevent default behavior (Prevent file from being opened)
+	    dropZone.style.backgroundColor = 'green';  // Change background color
+	    dropZone.style.color = 'white';  // Change text color
+	    dropZone.textContent = 'That\'s it. Just let the mouse go...';  // Change text
+	});
+
+	dropZone.addEventListener('dragleave', function(e) {
+	    dropZone.style.backgroundColor = '';  // Revert background color
+	    dropZone.style.color = '';  // Revert text color
+	    dropZone.textContent = originalText;  // Revert text
+	});
+
+	dropZone.addEventListener('drop', function(e) {
+	    dropZone.style.backgroundColor = '';  // Revert background color
+	    dropZone.style.color = '';  // Revert text color
+	    dropZone.textContent = originalText;  // Revert text
+	});
+
+	
+	
+	
 </script>
+
+
 
 </body>
 </html>
