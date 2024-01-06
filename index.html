@@ -7,6 +7,33 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <style>
 
+	html, body {
+	    height: 100%;
+	    margin: 0;
+	}
+
+	.page-container {
+	    display: flex;
+	    flex-direction: column;
+	    min-height: 100%;
+	}
+
+	.content-wrap {
+	    flex: 1; /* Ensures that this container takes up the available space */
+	    /* Add additional styling for your content here */
+	}
+	
+	.footer {
+	    text-align: center;
+	    color: grey;
+	    width: 100%;
+	    background-color: #f5f5f5;
+	    padding: 10px 0; /* Reduced padding to decrease height */
+	    font-size: 0.8em; /* Smaller font size */
+	}
+	
+
+
 	#dropZone {
 	    display: flex; /* Use Flexbox */
 	    align-items: center; /* Align items vertically in the center */
@@ -62,6 +89,7 @@
 	.output-container {
 	    max-width: 100%; /* Match the width with dropZone */
 	    margin: 0 auto; /* Center the container */
+		padding-bottom: 150px;
 	    display: flex;
 	    justify-content: space-between;
 	}
@@ -141,7 +169,8 @@
 </style>
 </head>
 <body>
-
+    <div class="page-container">
+        <div class="content-wrap">
 <h1>Town Treasurer Tools</h1>
     <div class="introcontainer">
         <p>This web application is your go-to solution for simplifying and parsing town treasury data. Designed with data privacy and security in mind, it's perfect for quickly converting OpenGov Munis import files into a more manageable format while keeping the data safe.</p>
@@ -160,8 +189,6 @@
         </ul>
         <p>Transform your Munis files with confidence and ease, knowing your data remains under your control.</p>
     </div>
-</body>
-</html>
 
 
 <div id="dropZone">
@@ -190,6 +217,13 @@
 
 
 </div>
+</div>
+
+        <footer class="footer">
+            Town Treasurer Tools is made available under the GPL-3.0 license. 
+            <a href="https://github.com/pauljeffrussell/town-treasurer-tools" target="_blank">View the code</a>.
+        </footer>
+
 <script>
  
 	   function handleFileSelect(evt) {
