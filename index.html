@@ -25,12 +25,25 @@
 	    margin-top: 0;
 	}
 
-	/* Center the button */
-	#toggleContentBtn {
-	    display: block;
-	    margin: 20px auto; /* Center the button */
-	    padding: 10px 20px; /* Optional: Adjust padding for better button size */
+
+
+
+	/* Container for the buttons */
+	.button-container {
+	    display: flex;
+	    justify-content: center; /* Aligns the buttons in the center */
+	    align-items: center; /* Centers the buttons vertically */
+	    
 	}
+
+	/* Styling for the buttons */
+	.button {
+	    margin: 0 10px; /* Adds some space between the buttons */
+	    padding: 10px 20px; /* Adds padding inside the buttons */
+	    /* Add more styling as needed */
+	}
+	
+
 
 	/* Container for both groups */
 	.output-container {
@@ -94,7 +107,7 @@
 	    text-decoration: none; /* Optional: Removes underline from links */
 	}
 	
-	#toggleContentBtn, #metricsContainer, .output-container {
+	#toggleContentBtn, #metricsContainer, #downloadAllBtn, .output-container, .theButtons {
 	    display: none; /* Hide these elements initially */
 	}
 	
@@ -106,9 +119,10 @@
 
 <div id="dropZone">Drag and drop an OpenGov Munis import file here</div>
 
-<button id="toggleContentBtn">Show File Contents</button>
-
-
+<div class="button-container">
+    <button id="toggleContentBtn" class="button">Show File Contents</button>
+    <button id="downloadAllBtn" class="button">Download All</button>
+</div>
 
 <div id="outputContainer" class="output-container">
 	
@@ -183,6 +197,7 @@
 
 	       reader.readAsText(file);
 		   document.getElementById('toggleContentBtn').style.display = 'block';
+		   document.getElementById('downloadAllBtn').style.display = 'block';
 		   //document.getElementById('metricsContainer').style.display = 'block';
 		   document.querySelector('.output-container').style.display = 'flex';
 	   }
@@ -219,6 +234,7 @@
 
 	           link.addEventListener('click', function() {
 	               link.style.color = 'green'; // Change color after clicking
+				   link.style.textDecoration = 'line-through';
 	               var downloadedText = document.createElement('span');
 	               downloadedText.textContent = ' Downloaded!';
 	               downloadedText.style.color = 'green';
@@ -303,6 +319,18 @@
 	    dropZone.textContent = originalText;  // Revert text
 	});
 
+	function downloadAllFiles() {
+	    var links = document.querySelectorAll('.download-link');
+
+	    links.forEach(function(link, index) {
+	        setTimeout(function() {
+	            link.click(); // Trigger a click on each link
+	        }, index * 1000); // Delay subsequent downloads to avoid popup blockers
+	    });
+	}
+
+	// Add this function to a button's click event
+	document.getElementById('downloadAllBtn').addEventListener('click', downloadAllFiles);
 	
 	
 	
