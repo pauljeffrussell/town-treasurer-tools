@@ -230,6 +230,8 @@
 </div>
 </div>
 
+
+
         <footer class="footer">
             Town Treasurer Tools is made available under the GPL-3.0 license. 
             <a href="https://github.com/pauljeffrussell/town-treasurer-tools" target="_blank">View the code</a>.
@@ -263,10 +265,13 @@
 	           totalCount = lines.length;
 	           var lastLine = null;
 
-	           lines.forEach(function(line, index) {
-	               if (lastLine && (lastLine.endsWith('3') || lastLine.endsWith('4'))) {
-	                   var date = formatDate(lastLine.split(',')[2]); // Date from the matching row
-	                   var groupType = lastLine.endsWith('3') ? '3' : '4';
+	          lines.forEach(function(line, index) {
+	               //if (lastLine && (lastLine.endsWith('3') || lastLine.endsWith('4'))) {
+					if (lastLine && (getColumnTen(lastLine) == '3' || getColumnTen(lastLine) == '4' )) {
+	                 
+					   var date = formatDate(lastLine.split(',')[2]); // Date from the matching row
+	                 
+					   var groupType = getColumnTen(lastLine) == '3' ? '3' : '4';
 					   var amount = parseFloat(line.split(',')[2]) || 0; // Amount from the following row
 	                   if (!groupData[groupType][date]) {
 	                       groupData[groupType][date] = {
@@ -284,6 +289,12 @@
 	               }
 	               lastLine = line;
 	           });
+			   
+
+			 
+
+		
+
 
 	           displayMetrics(totalCount, unaddedCount, group3Count, group4Count, groupData);
 	           createDownloadLinks(groupData['3'], 'CC', 'group3Container');
@@ -295,6 +306,10 @@
 		   document.getElementById('downloadAllBtn').style.display = 'block';
 		   //document.getElementById('metricsContainer').style.display = 'block';
 		   document.querySelector('.output-container').style.display = 'flex';
+	   }
+
+	   function getColumnTen (line) {
+	   	return line.split(',')[9]
 	   }
 
 	   function displayMetrics(total, unadded, group3, group4, groupData) {
