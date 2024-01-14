@@ -279,10 +279,10 @@
 </style>
 </head>
 <body>
-    <div class="page-container">
-        <!--div class="content-wrap">
+    <div  class="page-container">
+        <div class="content-wrap">
 <h1>Town Treasurer Tools</h1>
-    <div class="introcontainer">
+    <div id="infoText" class="introcontainer">
         <p>This page converts OpenGov Munis files into a format suitable for importing into town treasurer payment software. The data never leaves your computer which ensures data privacy and security.</p>
         
         <h2>How It Works:</h2>
@@ -298,7 +298,7 @@
             <li><strong>Runs on your computer:</strong>This page uses your browser like a local application, meaning everything happens on your side, keeping your data secure. It effectively has the same security controls as if you were using excel on your computer.</li>
         </ul>
       
-    </div-->
+    </div>
 
 
 <!--div id="dropZone">
@@ -404,6 +404,9 @@
  var oldestTransactionDateNumber = 30000000;
  
  var partialsOn = true;
+
+ var transactionFileUploaded =false;
+ var paymentsFileUploaded = false;
 
 
  function handleTransactionsFile(evt) {
@@ -517,6 +520,8 @@
  		//createDownloadLinks(groupData['4'], 'echeck', 'group4Container');
  		//createDownloadLinksNew(transactions, 'echeck', '4');
  		//createDownloadLinksNew(transactions, 'CC', '3');
+		transactionFileUploaded = true;
+		triggerDisappear();
  	};
 
  	reader.readAsText(file);
@@ -606,7 +611,9 @@
  		//createDownloadLinksNew(transactions, 'echeck', '4');
  		//createDownloadLinksNew(transactions, 'CC', '3');
 		//renderPaymentInfo();
-
+		paymentsFileUploaded = true;
+		triggerDisappear();
+		
  	};
 
  	reader.readAsText(file);
@@ -869,13 +876,16 @@
  }
 
  function triggerDisappear() {
-     const div = document.getElementById('boxes');
-     div.classList.add('disappear');
+	 
+	 if (transactionFileUploaded == true && paymentsFileUploaded == true) {
+	     const div = document.getElementById('infoText');
+	     div.classList.add('disappear');
 
-     // Optional: To remove the element from the DOM after animation
-     div.addEventListener('animationend', () => {
-         div.style.display = 'none';
-     });
+	     // Optional: To remove the element from the DOM after animation
+	     div.addEventListener('animationend', () => {
+	         div.style.display = 'none';
+	     });
+	 }
  }
 
 
@@ -1523,7 +1533,7 @@ function formatDateStringToNumber(dateStr) {
  	links.forEach(function(link, index) {
  		setTimeout(function() {
  			link.click(); // Trigger a click on each link
- 		}, index * 1000); // Delay subsequent downloads to avoid popup blockers
+ 		}, index * 300); // Delay subsequent downloads to avoid popup blockers
  	});
  }
 
