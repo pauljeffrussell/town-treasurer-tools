@@ -45,7 +45,7 @@
 	
 
 
-	#dropZone {
+	#dropBox1, #dropBox2 {
 	    display: flex; /* Use Flexbox */
 	    align-items: center; /* Align items vertically in the center */
 	    justify-content: center; /* Center items horizontally */
@@ -54,11 +54,12 @@
 	    padding: 50px;
 	    margin: 20px auto;
 	    max-width: 60%;
+		max-height: 100px;
 	    background-color: #F0F0F0;
 	    transition: background-color 0.3s;
 	}
 
-	#dropZone img {
+	.drop-box img {
 	    margin-right: 20px; /* Space between the image and the text */
 	    max-width: 100px; /* Adjust the size of the image as needed */
 	    height: auto; /* Maintain the aspect ratio of the image */
@@ -68,6 +69,23 @@
 	    min-width: 200px; /* Set a minimum width for the text span */
 	    text-align: left; /* Align the text to the left of the span */
 	}
+
+    #boxes {
+         display: flex;
+         justify-content: center;
+         gap: 20px;
+         padding: 20px;
+     }
+     .drop-box {
+         width: 300px;
+         height: 200px;
+         border: 2px dashed #ccc;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         text-align: center;
+         font-family: Arial, sans-serif;
+     }
 
 
 
@@ -159,9 +177,7 @@
 	    text-decoration: none; /* Optional: Removes underline from links */
 	}
 	
-	#toggleContentBtn, #metricsContainer, #downloadAllBtn, .output-container, .theButtons {
-	    display: none; /* Hide these elements initially */
-	}
+
 	
     body {
         font-family: Arial, sans-serif;
@@ -177,11 +193,94 @@
         color: #4a7a8c;
     }
 	
+	/* Updated .group class */
+	.group {
+	    width: 50%; /* Adjust the width as needed */
+	    flex: 0 0 50%; /* Adjust flex-basis to 50% and make it not grow or shrink */
+	}
+
+	/* Specific styling for #paymentsContainer */
+	#paymentsContainer {
+	    width: 100%; /* Make it take the full width */
+	    flex: 0 0 100%; /* Adjust flex-basis to 100% and make it not grow or shrink */
+	}
+
+	/* Make the output-container wrap its children */
+	.output-container {
+	    max-width: 100%; 
+	    margin: 0 auto;
+	    display: flex;
+	    flex-wrap: wrap; /* Add this line to allow wrapping */
+	    justify-content: space-between;
+	    padding-bottom: 20px;
+	}
+	
+ 
+	/* Style for the table */
+	table {
+	    width: 100%;
+	    border-collapse: collapse;
+	}
+
+	/* Style for table headers and cells */
+	th, td {
+	    border: 1px solid black;
+	    padding: 8px;
+	    text-align: left;
+	}
+	.match-true {
+	    background-color: #a9a9a9; /* Darker gray for match true */
+	}
+
+	.match-false {
+	    background-color: #ffffff; /* White for match false */
+	}
+
+	@keyframes fadeOutAndShrink {
+	    from {
+	        opacity: 1;
+	        transform: scale(1); /* Start with the original size */
+	    }
+	    to {
+	        opacity: 0;
+	        transform: scale(0); /* Shrink down to nothing */
+	    }
+	}
+
+	.disappear {
+	    animation: fadeOutAndShrink 2s ease forwards;
+	}
+
+
+	@keyframes fadeOutAndCollapse {
+	    from {
+	        opacity: 1;
+	        height: auto;  /* Adjust if you have a specific height */
+	        width: auto;   /* Adjust if you have a specific width */
+	        margin: 10px;  /* Adjust to your current margin */
+	        padding: 10px; /* Adjust to your current padding */
+	    }
+	    to {
+	        opacity: 0;
+	        height: 0;
+	        width: 0;
+	        margin: 0;
+	        padding: 0;
+	    }
+	}
+
+	.disappear {
+	    animation: fadeOutAndCollapse 2s ease forwards;
+	    overflow: hidden; /* Prevents content overflow during animation */
+	}
+
+
+	
 </style>
 </head>
 <body>
     <div class="page-container">
-        <div class="content-wrap">
+        <!--div class="content-wrap">
 <h1>Town Treasurer Tools</h1>
     <div class="introcontainer">
         <p>This page converts OpenGov Munis files into a format suitable for importing into town treasurer payment software. The data never leaves your computer which ensures data privacy and security.</p>
@@ -199,20 +298,67 @@
             <li><strong>Runs on your computer:</strong>This page uses your browser like a local application, meaning everything happens on your side, keeping your data secure. It effectively has the same security controls as if you were using excel on your computer.</li>
         </ul>
       
-    </div>
+    </div-->
 
 
-<div id="dropZone">
+<!--div id="dropZone">
     <img src="security-icon.png" alt="Secure file parsing" id="dropZoneImage">
     <span id="dropZoneText">Drag and drop an OpenGov Munis import file here to get started.</span>
-</div>
+</div-->
+
+ <div id="boxes" class="drop-box-container">
+        <!-- First Drop Box -->
+        <div class="drop-box" id="dropBox1" ondrop="handleTransactionsFile(event)" ondragover="event.preventDefault()">
+		    <img src="security-icon.png" alt="Secure file parsing" id="dropZoneImage">
+		    <span id="dropZone1Text">Drag and drop an OpenGov Munis import file here to get started.</span>
+        </div>
+
+        <!-- Second Drop Box -->
+        <div class="drop-box" id="dropBox2" ondrop="handleStripeFile(event)" ondragover="event.preventDefault()">
+		    <img src="security-icon.png" alt="Secure file parsing" id="dropZoneImage">
+		    <span id="dropZone2Text">Drag and drop an Stripe Payment file here to matches.</span>
+        </div>
+    </div>
 
 <div class="button-container">
-    <button id="toggleContentBtn" class="button">Show File Contents</button>
-    <button id="downloadAllBtn" class="button">Download All</button>
+    <!--button id="toggleContentBtn" >Show File Contents</button-->
+    <button id="toggleMatchesButton" class="button">Hide/Show Matches</button>
+		<button id="downloadMatchedFilesButton" class="button">Download ONLY MATCHED OpenGov Files</button>	
+	<button id="downloadAllBtn" class="button">Download All OpenGov Files</button>
+
+	<button id="exportButton" class="button">Export Match Tables to CSV</button>
+	
+	
 </div>
 
-<div id="outputContainer" class="output-container">
+
+    <h2>Matched Transactions</h2>
+    <table id="transactionsTable">
+        <tr>
+            <th>OpenGov Date</th>
+            <th>Amount</th>
+            <th>Match Info</th>
+			<th>Match</th>
+			<th>Type</th>
+			<th>Download</th>
+        </tr>
+        <!-- Rows will be added here dynamically -->
+    </table>
+	
+	
+    <h2>Matched Payments</h2>
+    <table id="paymentsTable">
+        <tr>
+            <th>Payment Date</th>
+            <th>Amount</th>
+            <th>Match Info</th>
+			<th>Match</th>
+        </tr>
+        <!-- Rows will be added here dynamically -->
+    </table>
+	
+
+<!--div id="outputContainer" class="output-container">
 	
 <div id="metricsContainer"></div>
 	
@@ -226,9 +372,14 @@
     <div id="group4Container" class="group-container"></div>
 </div>
 
+<div class="group">
+    <div class="group-title">Payments</div>
+    <div id="paymentsContainer" class="group-container"></div>
+</div>
+
 
 </div>
-</div>
+</div-->
 
 
 
@@ -238,213 +389,1062 @@
         </footer>
 
 <script>
+ var payments = [];
+
+ var transactions = [];
  
-	   function handleFileSelect(evt) {
-	       evt.stopPropagation();
-	       evt.preventDefault();
+ 
+ var transactionsArray = [];
+ 
+ var paymentsArray = [];
+ 
+ var oldestTransactionDateNumber = 30000000;
 
-	       var file = evt.dataTransfer.files[0]; // FileList object.
 
-	       if (!file.type.match('text.*')) {
-	           alert('Please upload a text-based file.');
-	           return;
-	       }
+ function handleTransactionsFile(evt) {
+ 	evt.stopPropagation();
+ 	evt.preventDefault();
 
-	       var reader = new FileReader();
-	       var totalCount = 0;
-	       var unaddedCount = 0;
-	       var group3Count = 0;
-	       var group4Count = 0;
-	       var groupData = {
-	           '3': {},
-	           '4': {}
-	       };
+ 	var file = evt.dataTransfer.files[0]; // FileList object.
 
-	       reader.onload = function(e) {
-	           var lines = e.target.result.split(/\r\n|\n/);
-	           totalCount = lines.length;
-	           var lastLine = null;
+ 	if (!file.type.match('text.*')) {
+ 		alert('Please upload a text-based file.');
+ 		return;
+ 	}
 
-	          lines.forEach(function(line, index) {
-	               //if (lastLine && (lastLine.endsWith('3') || lastLine.endsWith('4'))) {
-				   if (lastLine && (getColumnTen(lastLine) == '3' || getColumnTen(lastLine) == '4' )) {
-	                 
-					   var date = formatDate(lastLine.split(',')[2]); // Date from the matching row
-	                 
-					   var groupType = getColumnTen(lastLine) == '3' ? '3' : '4';
-					   var amount = parseFloat(line.split(',')[2]) || 0; // Amount from the following row
-	                   if (!groupData[groupType][date]) {
-	                       groupData[groupType][date] = {
-	                           lines: [],
-	                           total: 0
-	                       };
-	                   }
-	                   groupData[groupType][date].lines.push(lastLine + '\n' + line);
-					   groupData[groupType][date].total += amount;
-						
-	                   if (groupType === '3') group3Count += 2;
-	                   else if (groupType === '4') group4Count += 2;
-	               } else {
-	                   unaddedCount += 1;
-	               }
-	               lastLine = line;
-	           });
-			   
+ 	var reader = new FileReader();
+ 	var totalCount = 0;
+ 	var unaddedCount = 0;
+ 	var group3Count = 0;
+ 	var group4Count = 0;
 
-			 
 
+ 	reader.onload = function(e) {
+ 		var lines = e.target.result.split(/\r\n|\n/);
+ 		totalCount = lines.length;
+ 		var lastLine = null;
+
+ 		lines.forEach(function(line, index) {
+ 			//if (lastLine && (lastLine.endsWith('3') || lastLine.endsWith('4'))) {
+ 			if (lastLine && (getColumnTen(lastLine) == '3' || getColumnTen(lastLine) == '4')) {
+
+ 				var date = formatDate(lastLine.split(',')[2]); // Date from the matching row
+
+ 				var groupType = getColumnTen(lastLine); // == '3' ? '3' : '4';
+ 				var amount = parseFloat(line.split(',')[2]) || 0; // Amount from the following row
+ 				var dateAndGroupID = date + "-" + getColumnTen(lastLine)
+
+ 				if (!transactions[dateAndGroupID]) {
+ 					transactions[dateAndGroupID] = {
+ 						lines: [],
+ 						date: '',
+						dateNumber: '',
+ 						total: 0,
+ 						dateAndGroupID: '',
+						groupType: '',
+						groupName:'',
+						match: false
+ 					};
+ 				}
+
+
+
+ 				/*if (!groupData[groupType][date]) {
+	   	                       groupData[groupType][date] = {
+	   	                           lines: [],
+	   	                           total: 0
+	   	                       };
+	   	                   }*/
+
+ 				transactions[dateAndGroupID].lines.push(lastLine + '\n' + line);
+ 				//groupData[groupType][date].lines.push(lastLine + '\n' + line);
+ 				transactions[dateAndGroupID].total += amount;
+ 				//transactions[dateAndGroupID].date = date;
+				transactions[dateAndGroupID].date = formatDateString(date);
+				dateNumber = formatDateStringToNumber(transactions[dateAndGroupID].date);
+				transactions[dateAndGroupID].dateNumber = dateNumber;
+				
+				console.log("handleTransactionsFile: "+ dateNumber);
+				if (dateNumber != null && dateNumber < oldestTransactionDateNumber) {
+					oldestTransactionDateNumber = dateNumber;
+				}
+				
+					
+				
+ 				transactions[dateAndGroupID].dateAndGroupID = dateAndGroupID;
+				transactions[dateAndGroupID].groupType = groupType;
+				
+				if (groupType === '3') {
+					transactions[dateAndGroupID].groupName = "Credit Card";
+				}
+				else if (groupType === '4') {
+					transactions[dateAndGroupID].groupName = "E-Check";
+				}
+					
+				
+ 				
+
+ 				//groupData[groupType][date].total += amount;
+
+ 				if (groupType === '3') group3Count += 2;
+ 				else if (groupType === '4') group4Count += 2;
+ 			} else {
+ 				unaddedCount += 1;
+ 			}
+ 			lastLine = line;
+ 		});
+
+
+	   	 // Convert the transactions object into an array of its values
+	   	 transactionsArray = Object.keys(transactions).map(function(key) {
+	   	     return transactions[key];
+	   	 });
+
+	   	 // Sort the array by the dateNumber property
+	   	 transactionsArray.sort(function(a, b) {
+	   	     return a.dateNumber - b.dateNumber;
+	   	 });
+
+ 		//displayMetrics(totalCount, unaddedCount, group3Count, group4Count, groupData);
+ 		//createDownloadLinks(groupData['3'], 'CC', 'group3Container');
+ 		//createDownloadLinks(groupData['4'], 'echeck', 'group4Container');
+ 		//createDownloadLinksNew(transactions, 'echeck', '4');
+ 		//createDownloadLinksNew(transactions, 'CC', '3');
+ 	};
+
+ 	reader.readAsText(file);
+ 	//document.getElementById('toggleContentBtn').style.display = 'block';
+ 	//document.getElementById('downloadAllBtn').style.display = 'block';
+ 	//document.getElementById('metricsContainer').style.display = 'block';
+ 	//document.querySelector('.output-container').style.display = 'flex';
+ }
+
+
+ function handleStripeFile(evt) {
+ 	// Similar structure to handleFileSelect, adjusted for the second CSV file format
+ 	evt.stopPropagation();
+ 	evt.preventDefault();
+
+ 	var file = evt.dataTransfer.files[0]; // FileList object.
+
+ 	if (!file.type.match('text.*')) {
+ 		alert('Please upload a text-based file.');
+ 		return;
+ 	}
+
+ 	// ... existing checks for file type ...
+
+ 	var reader = new FileReader();
+
+ 	reader.onload = function(e) {
+ 		var lines = e.target.result.split(/\r\n|\n/);
+ 		//var deposits = [];
+
+ 		/*lines.forEach(function(line, index) {
+ 			if (index === 0) return; // Skip header line
+ 			var parts = line.split(',');
+ 			var date = parts[7]; // Adjust column index for date
+ 			var amount = parseFloat(parts[3]) || 0; // Adjust column index for amount
+ 			payments.push({
+ 				date: date,
+ 				amount: Math.abs(amount)
+ 			}); // Convert amount to positive for matching
+ 			console.log("Read " + date + " " + amount)
+
+ 		});*/
 		
+		lines.forEach(function(line, index) {
+		    if (index === 0) return; // Skip header line
+
+		    var parts = line.split(',');
+			
+			var date = parts[7];
+		    if (!date || date.length < 10) {
+		        //console.log('Invalid datetime format. Expected format: YYYY-MM-DD HH:MM. Its fine. just keep going');
+		    }
+			else{
+				date = parts[7].substring(0, 10); //trim off the time
+			}
+			
+		    var amount = parseFloat(parts[3]) || 0; // Adjust column index for amount
+
+			//console.log("handleStripeFile paymentNumber: " + formatDateStringToNumber(date));
+
+		    // Use the index as a key in the payments object
+		    payments[index] = {
+		        date: date,
+				dateNumber: formatDateStringToNumber(date),
+		        amount: Math.abs(amount),
+				match: false
+				
+		    }; // Convert amount to positive for matching
+		    //console.log("Read " + date + " " + amount);
+		});
+
+ 		// Process deposits...
+		
+	   	 // Convert the payments object into an array of its values
+	   	 paymentsArray = Object.keys(payments).map(function(key) {
+	   	     return payments[key];
+	   	 });
+
+	   	 // Sort the array by the dateNumber property
+	   	 
+		 paymentsArray.sort(function(a, b) {
+	   	     return a.dateNumber - b.dateNumber;
+	   	 });
+		
+		matchTransactionsToPayments();
+ 		//createDownloadLinksNew(transactions, 'echeck', '4');
+ 		//createDownloadLinksNew(transactions, 'CC', '3');
+		//renderPaymentInfo();
+
+ 	};
+
+ 	reader.readAsText(file);
+	
+	
+ }
 
 
-	           displayMetrics(totalCount, unaddedCount, group3Count, group4Count, groupData);
-	           createDownloadLinks(groupData['3'], 'CC', 'group3Container');
-	           createDownloadLinks(groupData['4'], 'echeck', 'group4Container');
-	       };
+/**
+ * Function: matchTransactionsToPayments
+ * 
+ * Description:
+ * This function is designed to find and record matches between transactions and payments.
+ * It iterates over each transaction and payment, comparing their amounts to identify matches.
+ * When a match is found, it updates both the transaction and payment objects with match information.
+ * 
+ * The function relies on two global objects: 'transactions' and 'payments', where:
+ * - 'transactions' is an object with transaction IDs as keys and transaction details as values.
+ * - 'payments' is an object with payment IDs as keys and payment details as values.
+ * 
+ * Each transaction and payment object is expected to have at least the following properties:
+ * - transaction.total: The total amount of the transaction.
+ * - payment.amount: The amount of the payment.
+ * - transaction.match (updated by function): A boolean flag indicating if a match was found.
+ * - transaction.matchDetail (updated by function): A string detailing the matching payment.
+ * - payment.match (updated by function): A boolean flag indicating if a match was found.
+ * - payment.matchDetail (updated by function): A string detailing the matching transaction.
+ * 
+ * The function logs to the console each transaction and payment amount as it checks for matches,
+ * and it also logs when a match is found.
+ * 
+ * Usage:
+ * This function does not take any parameters and does not return any value.
+ * It should be called when there is a need to match transactions with payments.
+ * Ensure that the 'transactions' and 'payments' objects are properly populated before calling this function.
+ * 
+ * Example:
+ * matchTransactionsToPayments();
+ *
+ * 
+ 
+ Next Steps
+ 
+ TODO - Match the closest payment date on or after the transaction. Payments cant happen before
+ TODO - Once you have a match, stop. 
+ TODO - For transactions without matches, try combining two transactions to see it it matches a payment.
+ 
+ TODO - Fix visibility.
+ */
+ 
 
-	       reader.readAsText(file);
-		   document.getElementById('toggleContentBtn').style.display = 'block';
-		   document.getElementById('downloadAllBtn').style.display = 'block';
-		   //document.getElementById('metricsContainer').style.display = 'block';
-		   document.querySelector('.output-container').style.display = 'flex';
-	   }
 
-	   function getColumnTen (line) {
-	   	return line.split(',')[9]
-	   }
+ function matchTransactionsToPayments() {
+     //console.log("Starting matchTransactionsToPayments...");
 
-	   function displayMetrics(total, unadded, group3, group4, groupData) {
-	       var metricsContainer = document.getElementById('metricsContainer');
-	       metricsContainer.innerHTML = `
+     // Iterate over all the sorted transactions
+     transactionsArray.forEach(function (transaction) {
+         
+		 // Use a for loop to have control over the iteration
+         for (let i = 0; i < paymentsArray.length; i++) 
+		 {
+             const payment = paymentsArray[i];
+         
+		     //console.log("Transaction amount: " + transaction.total);
+             //console.log("Payment.    amount: " + payment.amount);
+             
+			 if (!payment.match && payment.date >= transaction.date) 
+			 {
+			 	// this is a possible match because the payment has to happen on or after the date of the transaction
+				 if (transaction.total == payment.amount) 
+				 {
+	                 //console.log('Holy Crap! We found a match! Date:', payment.date, 'Amount:', payment.amount);
+	                 transaction.match = true;
+	                 transaction.matchDetail = " Matches Stripe: " + payment.date + " for " + payment.amount;
+	                 payment.match = true;
+	                 payment.matchDetail = "Matches Transaction: " + transaction.date + " for " + transaction.total;
+					 break; // no need to keep checking payments for this transaction because we just found a match.
+	             }
+			 }
+		 }
+     });
+
+	 findMatchingPairs(transactionsArray, paymentsArray);
+     populateTransactionMatchTable(transactionsArray);
+     populatePaymentMatchTable(paymentsArray);
+	 
+ }
+
+/**
+ * Finds pairs of numbers in the first list whose sum matches any number in the second list.
+ * 
+ * This function iterates over each element in the first list (`firstList`) and attempts to 
+ * pair it with every other element in the same list. For each pair, it calculates their sum
+ * and checks if this sum is present in the second list (`secondList`). If a match is found,
+ * the pair is added to an array of matching pairs.
+ * 
+ * Note: The function avoids duplicates and does not pair a number with itself. 
+ * The time complexity of this function is O(n^2), where n is the length of the first list.
+ * 
+ * @param {number[]} firstList - The first list of numbers to be paired.
+ * @param {number[]} secondList - The second list of numbers to match sums against.
+ * @returns {number[][]} An array of pairs from the first list that sum to an element in the second list.
+ * 
+ * @example
+ * // Example usage
+ * let list1 = [1, 2, 3, 4, 5];
+ * let list2 = [5, 7, 9, 10];
+ * let matchingPairs = findMatchingPairs(list1, list2);
+ * console.log(matchingPairs); // Outputs: [[2, 3], [1, 4]]
+ */
+ function findMatchingPairs(tArray, pArray) {
+     let pairs = [];
+
+	 console.log("tArray.length: " + tArray.length);
+	 console.log("pArray.length: " + pArray.length);
+
+	 for (let x = 0; x < pArray.length; x++) 
+	 {
+		 console.log("Starting loop");
+		 //console.log("Trying " + pArray[x].date);
+		 //console.log("pArray[z].match " + pArray[x].match);
+		 if (pArray[x].match == false && pArray[x].dateNumber >= oldestTransactionDateNumber)
+		 {
+			 console.log("checking pArray[x].date:" + pArray[x].date + " total: "+ pArray[x].amount);
+		     for (let i = 0; i < tArray.length; i++) 
+			 {
+				 if (tArray[i].match == false & tArray[i].dateNumber <= pArray[x].dateNumber) 
+				 {
+					// console.log("checking First tArray[i].date:" + tArray[i].date + "   " + tArray[i].total);
+		      
+				 	// this transaction could be part of the payment because it happened on or before the day of the payment 
+					 for (let j = i + 1; j < tArray.length; j++) 
+					 {
+		             	if (tArray[j].match == false & tArray[j].dateNumber <= pArray[x].dateNumber) 
+						{
+	   					 	//console.log("checking Second tArray[j].date:" + tArray[j].date + "   " + tArray[i].total);
+						 
+							// this transaction could be part of the payment because it happened on or before the day of the payment
+							 let sum = tArray[i].total + tArray[j].total;
+							 console.log("summing " +  tArray[i].total + " + " + tArray[j].total + " = " + sum);
+				             if (pArray[x].amount == sum) 
+							 {
+								 console.log("found match for trasaction");
+								 console.log("sum: " + sum);
+							 
+								 console.log("value 1: " + tArray[i].total);
+								 console.log("value 2: " + tArray[j].total);
+				                 //console.log('Holy Crap! We found a match! Date:', payment.date, 'Amount:', payment.amount);
+				                 
+								 
+								 tArray[i].match = true;
+								 tArray[j].match = true;
+
+								 tArray[i].matchDetail = "<pre>Partial Match for Stripe: " + pArray[x].date + " for " + pArray[x].amount +  " with\n" +
+								                         //"           Transaction 1: " + tArray[i].date + " for " + tArray[i].total + " with \n" +
+								 						      "       Other Transaction: " + tArray[j].date + " for " + tArray[j].total + "</pre>";
+								 
+								 tArray[j].matchDetail = "<pre>Partial Match for Stripe: " + pArray[x].date + " for " + pArray[x].amount +  " with\n" +
+								                         //"           Transaction 1: " + tArray[j].date + " for " + tArray[j].total + " with \n" +
+								 						      "       Other Transaction: " + tArray[i].date + " for " + tArray[i].total + "</pre>";
+								 
+								 pArray[x].match = true;
+								 pArray[x].matchDetail = "<pre>Group Match:\n" +
+								                         "           Transaction 1: " + tArray[i].date + " for " + tArray[i].total + " and \n" +
+								 						 "           Transaction 2: " + tArray[j].date + " for " + tArray[j].total + "</pre>";
+								 
+														 
+								 
+								 /*tArray[j].matchDetail = true;
+								 tArray[i].matchDetail = "Partial Match: " + pArray[x].date + " for " + pArray[x].amount +  "  \n" +
+                                            pArray[x].date + " for " + pArray[x].amount;
+
+				                 transaction.matchDetail = " Matches Stripe: " + payment.date + " for " + payment.amount;
+				                 payment.match = true;
+				                 payment.matchDetail = ">> Matches Transaction: " + transaction.date + " for " + transaction.total;
+								 break; // no need to keep checking payments for this transaction because we just found a match.*/
+							 } //if (pArray.amount == sum) 
+						 }
+					 }
+				 }
+			 }
+		 }
+	 }
+	 
+	 console.log("Completed findMatchingPairs");
+     return pairs;
+ }
+
+ function triggerDisappear() {
+     const div = document.getElementById('boxes');
+     div.classList.add('disappear');
+
+     // Optional: To remove the element from the DOM after animation
+     div.addEventListener('animationend', () => {
+         div.style.display = 'none';
+     });
+ }
+
+
+
+
+/**
+ * Finds pairs of numbers from the 'total' property in objects of the first list whose sum matches the 'amount' property 
+ * in objects of the second list.
+ * 
+ * The function iterates over each object in the first list (`firstList`) and attempts to pair its 'total' value 
+ * with the 'total' value of every other object in the same list. For each pair, it calculates their sum
+ * and checks if this sum matches the 'amount' value in any object of the second list (`secondList`). 
+ * If a match is found, the pair of objects (or rather their 'total' values) is added to an array of matching pairs.
+ * 
+ * Note: The function avoids duplicates and does not pair an object with itself.
+ * The time complexity of this function is O(n^2), where n is the length of the first list.
+ * 
+ * @param {{total: number}[]} firstList - The first list of objects containing 'total' values to be paired.
+ * @param {{amount: number}[]} secondList - The second list of objects containing 'amount' values to match sums against.
+ * @returns {{firstTotal: number, secondTotal: number}[]} An array of object pairs from the first list whose 'total' sums match an 'amount' in the second list.
+ * 
+ * @example
+ * // Example usage
+ * let list1 = [{total: 1}, {total: 2}, {total: 3}, {total: 4}, {total: 5}];
+ * let list2 = [{amount: 5}, {amount: 7}, {amount: 9}, {amount: 10}];
+ * let matchingPairs = findMatchingPairs(list1, list2);
+ * console.log(matchingPairs); // Outputs: [{firstTotal: 2, secondTotal: 3}, {firstTotal: 1, secondTotal: 4}]
+
+function findMatchingPairs2(firstList, secondList) {
+    let pairs = [];
+	
+	console.log("list 1 length: " + firstList.length)
+	console.log("list 2 length: " + secondList.length)
+    for (let i = 0; i < firstList.length; i++) {
+        for (let j = i + 1; j < firstList.length; j++) {
+            let sum = firstList[i].total + firstList[j].total;
+            if (secondList.some(item => item.amount === sum)) {
+				
+			 console.log("found match");
+			 console.log("sum: " + sum);
+			 console.log("value 1: " + firstList[i].total);
+			 console.log("value 2: " + firstList[j].total);
+				
+                //pairs.push({ firstTotal: firstList[i].total, secondTotal: firstList[j].total });
+            }
+        }
+    }
+	console.log("Completed findMatchingPairs");
+    return pairs;
+} */
+
+
+
+
+ function populateTransactionMatchTable(transactionList) {
+     const table = document.getElementById("transactionsTable");
+
+   	 // Sort the array by the dateNumber property
+   	 transactionList.sort(function(a, b) {
+   	     return b.dateNumber - a.dateNumber;
+   	 });
+
+
+	 transactionList.forEach(function(transaction) {
+         const row = table.insertRow();
+
+         // Set row color based on transaction.match
+         if (transaction.match) {
+             row.classList.add('match-true');
+         } else {
+             row.classList.add('match-false');
+         }
+
+         // Other transaction data cells
+         
+		 row.insertCell().textContent = transaction.date || '';
+         row.insertCell().textContent = transaction.total || 0;
+         row.insertCell().innerHTML = transaction.matchDetail || '';
+		 row.insertCell().textContent = transaction.match;
+		 row.insertCell().textContent = transaction.groupName || '';
+         
+         // Create a download link
+         const downloadCell = row.insertCell();
+         const blob = new Blob([transaction.lines.join('\n')], { type: 'text/csv' });
+         const url = URL.createObjectURL(blob);
+		 
+		 var matchText = "_NO_MATCH";
+		 
+		 if (transaction.match == true) {
+			 matchText = '';
+			
+		 }
+		 
+         const fileName = transaction.date + '_' + transaction.groupType + '_$' + transaction.total.toFixed(2)  + matchText + '.csv';
+
+         const downloadLink = document.createElement('a');
+         downloadLink.href = url;
+         downloadLink.download = fileName;
+         downloadLink.textContent = 'Download ' + fileName;
+         downloadLink.className = 'download-link'; // Add class for styling
+
+         // Add event listener for download link
+         downloadLink.addEventListener('click', function() {
+             downloadLink.style.color = 'green'; // Change color after clicking
+             downloadLink.style.textDecoration = 'line-through';
+             var downloadedText = document.createElement('span');
+             downloadedText.textContent = ' Downloaded!';
+             downloadedText.style.color = 'green';
+             downloadedText.style.fontWeight = 'bold';
+             downloadLink.parentNode.insertBefore(downloadedText, downloadLink.nextSibling);
+             downloadLink.removeEventListener('click', arguments.callee);
+         });
+
+         downloadCell.appendChild(downloadLink);
+     });
+ }
+
+
+/*
+ 
+            <th>Payment Date</th>
+            <th>Amount</th>
+            <th>Match Info</th>
+			<th>Match</th> 
+ 
+ */
+
+ function populatePaymentMatchTable(paymentsList) {
+     const table = document.getElementById("paymentsTable");
+
+   	 paymentsList.sort(function(a, b) {
+   	     return b.dateNumber - a.dateNumber;
+   	 });
+	 
+	 paymentsList.forEach(function(payment) {
+		 
+		 
+		 //console.log("paymentNumber: " + payment.dateNumber);
+		 //console.log("oldestTransactionDateNumber: " + oldestTransactionDateNumber);
+		 // Dont render payments that are older than the last transaction.
+		 if (payment.dateNumber >= oldestTransactionDateNumber) {
+		 	
+	         const row = table.insertRow();
+
+	         // Set row color based on transaction.match
+	         if (payment.match) {
+	             row.classList.add('match-true');
+	         } else {
+	             row.classList.add('match-false');
+	         }
+
+	         // Other transaction data cells
+         
+			 row.insertCell().textContent = payment.date || '';
+	         row.insertCell().textContent = payment.amount || 0;
+	         row.insertCell().innerHTML = payment.matchDetail || '';
+	         row.insertCell().textContent = payment.match;
+		 }
+	 });
+ }
+
+
+
+
+
+
+
+ function exportTableToCSV(html, filename) {
+     var csv = [];
+     var rows = document.querySelectorAll(html);
+
+     for (var i = 0; i < rows.length; i++) {
+         var row = [], cols = rows[i].querySelectorAll("td, th");
+
+         for (var j = 0; j < cols.length; j++) 
+             row.push('"' + cols[j].innerText + '"');
+
+         csv.push(row.join(","));        
+     }
+
+     // Download CSV
+     downloadCSV(csv.join("\n"), filename);
+ }
+
+ function downloadCSV(csv, filename) {
+     var csvFile;
+     var downloadLink;
+
+     // CSV file
+     csvFile = new Blob([csv], {type: "text/csv"});
+
+     // Download link
+     downloadLink = document.createElement("a");
+
+     // File name
+     downloadLink.download = filename;
+
+     // Create a link to the file
+     downloadLink.href = window.URL.createObjectURL(csvFile);
+
+     // Hide download link
+     downloadLink.style.display = "none";
+
+     // Add the link to DOM
+     document.body.appendChild(downloadLink);
+
+     // Click download link
+     downloadLink.click();
+ }
+
+
+
+ function createDownloadLinksNew(transactionList, transactionTypeName, transactionTypeNumber) {
+ 	var container = transactionTypeName === 'CC' ? document.getElementById('group3Container') : document.getElementById('group4Container');
+ 	container.innerHTML = '';
+
+
+ 	Object.keys(transactionList).forEach(function(id) {
+
+ 		var transaction = transactionList[id];
+
+ 		if (transaction.groupType != transactionTypeNumber) {
+ 			return;
+ 		}
+
+ 		//var date = transaction.date;
+ 		var blob = new Blob([transaction.lines.join('\n')], {
+ 			type: 'text/csv'
+ 		});
+ 		var url = URL.createObjectURL(blob);
+ 		var fileName = transaction.date + '_' + transactionTypeName + '_$' + transaction.total.toFixed(2) + '.csv';
+
+ 		var linkContainer = document.createElement('div');
+ 		linkContainer.className = 'link-container';
+
+ 		var link = document.createElement('a');
+ 		link.href = url;
+ 		link.download = fileName;
+ 		link.textContent = fileName + " " + transaction.matchDetail;
+ 		link.className = 'download-link'; // Add class for styling
+
+ 		link.addEventListener('click', function() {
+ 			link.style.color = 'green'; // Change color after clicking
+ 			link.style.textDecoration = 'line-through';
+ 			var downloadedText = document.createElement('span');
+ 			downloadedText.textContent = ' Downloaded!';
+ 			downloadedText.style.color = 'green';
+ 			downloadedText.style.fontWeight = 'bold';
+ 			link.parentNode.insertBefore(downloadedText, link.nextSibling);
+ 			link.removeEventListener('click', arguments.callee);
+ 		});
+
+ 		linkContainer.appendChild(link);
+
+ 		var contentDiv = document.createElement('pre');
+ 		contentDiv.textContent = transaction.lines.join('\n');
+ 		contentDiv.className = 'content-div';
+ 		contentDiv.style.display = 'none'; // Initially hide the content
+ 		linkContainer.appendChild(contentDiv);
+
+ 		container.appendChild(linkContainer);
+ 	});
+ }
+
+ function renderPaymentInfo() {
+	 var container = document.getElementById('paymentsContainer');
+	
+	 var contentDiv = document.createElement('pre');
+	 contentDiv.className = 'payment-div';
+	 //contentDiv.style.display = 'none'; // Initially hide the content
+	 //for (const payment of payments) {
+ 	 Object.keys(payments).forEach(function(paymentID) {
+ 		var payment = payments[paymentID];
+		contentDiv.textContent += payment.date + " " + payment.amount + " " + payment.matchDetail + "\n";
+  		//contentDiv.className = 'content-div';
+  		//contentDiv.style.display = 'none'; // Initially hide the content
+  		//linkContainer.appendChild(contentDiv); 
+	 });
+	 container.appendChild(contentDiv); 
+ }
+
+
+ function getColumnTen(line) {
+ 	return line.split(',')[9]
+ }
+
+
+
+
+
+
+ function displayMetrics(total, unadded, group3, group4, groupData) {
+ 	var metricsContainer = document.getElementById('metricsContainer');
+ 	metricsContainer.innerHTML = `
 	           <p>Total number of rows: ${total}</p>
 	           <p>Rows added to Group 3 files: ${group3}</p>
 	           <p>Rows added to Group 4 files: ${group4}</p>
 	           <p>Total number of Group 3 files: ${Object.keys(groupData['3']).length}</p>
 	           <p>Total number of Group 4 files: ${Object.keys(groupData['4']).length}</p>
 	       `;
-	   }
+ }
 
-	   function createDownloadLinks(groupedByDate, transactionType) {
-	       var container = transactionType === 'CC' ? document.getElementById('group3Container') : document.getElementById('group4Container');
-	       container.innerHTML = '';
+/*
+ function createDownloadLinks(groupedByDate, transactionType) {
+ 	var container = transactionType === 'CC' ? document.getElementById('group3Container') : document.getElementById('group4Container');
+ 	container.innerHTML = '';
 
-	       Object.keys(groupedByDate).forEach(function(date) {
-	           var dateData = groupedByDate[date];
-	           var blob = new Blob([dateData.lines.join('\n')], { type: 'text/csv' });
-	           var url = URL.createObjectURL(blob);
-	           var fileName = date + '_' + transactionType + '_$' + dateData.total.toFixed(2) + '.csv';
+ 	Object.keys(groupedByDate).forEach(function(date) {
+ 		var dateData = groupedByDate[date];
+ 		var blob = new Blob([dateData.lines.join('\n')], {
+ 			type: 'text/csv'
+ 		});
+ 		var url = URL.createObjectURL(blob);
+ 		var fileName = date + '_' + transactionType + '_$' + dateData.total.toFixed(2) + '.csv';
 
-			   var linkContainer = document.createElement('div');
-			   linkContainer.className = 'link-container';
+ 		var linkContainer = document.createElement('div');
+ 		linkContainer.className = 'link-container';
 
-	           var link = document.createElement('a');
-	           link.href = url;
-	           link.download = fileName;
-	           link.textContent = fileName;
-	           link.className = 'download-link'; // Add class for styling
+ 		var link = document.createElement('a');
+ 		link.href = url;
+ 		link.download = fileName;
+ 		link.textContent = fileName;
+ 		link.className = 'download-link'; // Add class for styling
 
-	           link.addEventListener('click', function() {
-	               link.style.color = 'green'; // Change color after clicking
-				   link.style.textDecoration = 'line-through';
-	               var downloadedText = document.createElement('span');
-	               downloadedText.textContent = ' Downloaded!';
-	               downloadedText.style.color = 'green';
-	               downloadedText.style.fontWeight = 'bold';
-	               link.parentNode.insertBefore(downloadedText, link.nextSibling);
-	               link.removeEventListener('click', arguments.callee);
-	           });
+ 		link.addEventListener('click', function() {
+ 			link.style.color = 'green'; // Change color after clicking
+ 			link.style.textDecoration = 'line-through';
+ 			var downloadedText = document.createElement('span');
+ 			downloadedText.textContent = ' Downloaded!';
+ 			downloadedText.style.color = 'green';
+ 			downloadedText.style.fontWeight = 'bold';
+ 			link.parentNode.insertBefore(downloadedText, link.nextSibling);
+ 			link.removeEventListener('click', arguments.callee);
+ 		});
 
-			   linkContainer.appendChild(link);
+ 		linkContainer.appendChild(link);
 
-	           var contentDiv = document.createElement('pre');
-	           contentDiv.textContent = dateData.lines.join('\n');
-	           contentDiv.className = 'content-div';
-	           contentDiv.style.display = 'none'; // Initially hide the content
-	           linkContainer.appendChild(contentDiv);
+ 		var contentDiv = document.createElement('pre');
+ 		contentDiv.textContent = dateData.lines.join('\n');
+ 		contentDiv.className = 'content-div';
+ 		contentDiv.style.display = 'none'; // Initially hide the content
+ 		linkContainer.appendChild(contentDiv);
 
-	           container.appendChild(linkContainer);
-	       });
-	   }
-  
+ 		container.appendChild(linkContainer);
+ 	});
+ }
+
+*/
 
 
-    function formatDate(dateString) {
-        var month = dateString.substring(0, 2);
-        var day = dateString.substring(2, 4);
-        var year = dateString.substring(4, 8);
-        return year + month + day;
+/**
+ * Converts a date string from 'YYYY-MM-DD' format to a number in 'YYYYMMDD' format.
+ *
+ * @param {string} dateStr - The date string in 'YYYY-MM-DD' format.
+ * @returns {number} The formatted date as a number in 'YYYYMMDD' format.
+ *
+ * @example
+ * formatDateStringToNumber("2023-12-03"); // Returns: 20231203
+ */
+function formatDateStringToNumber(dateStr) {
+    // Validate the input
+    if (!dateStr || dateStr.length !== 10 || dateStr.indexOf('-') === -1) {
+        console.log('Invalid date format. Expected format: YYYY-MM-DD.');
+        return null;
     }
 
-    function handleDragOver(evt) {
-        evt.stopPropagation();
-        evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy';
-    }
+    // Remove hyphens and convert to number
+    return Number(dateStr.replace(/-/g, ''));
+}
 
-    var dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', handleDragOver, false);
-    dropZone.addEventListener('drop', handleFileSelect, false);
+
+
+/**
+ * Converts a date string from 'YYYYMMDD' format to 'YYYY-MM-DD' format.
+ * 
+ * @param {string} dateStr - The date string in 'YYYYMMDD' format.
+ * @returns {string|null} The formatted date string in 'YYYY-MM-DD' format or null if input is invalid.
+ * 
+ * @example
+ * formatDateString("20240113"); // Returns: "2024-01-13"
+ * formatDateString("20241301"); // Returns null (invalid date)
+ */
+ function formatDateString(dateStr) {
+     if (dateStr.length !== 8 || isNaN(dateStr)) {
+         console.error('Invalid date format. Expected format: YYYYMMDD.');
+         return null;
+     }
+
+     var year = dateStr.substring(0, 4);
+     var month = dateStr.substring(4, 6);
+     var day = dateStr.substring(6, 8);
+
+     return year + '-' + month + '-' + day;
+ }
+
+
+// this takes a bonkers format and reorders it.
+ function formatDate(dateString) {
+ 	var month = dateString.substring(0, 2);
+ 	var day = dateString.substring(2, 4);
+ 	var year = dateString.substring(4, 8);
+ 	return year + month + day;
+ }
+
+/**************************************************************************
+
+
+			BUTTON MANAGEMENT
+
+
+**************************************************************************/
+ /*document.getElementById('toggleContentBtn').addEventListener('click', function() {
+ 	var contentDivs = document.getElementsByClassName('content-div');
+ 	var isContentVisible = false; // Flag to track content visibility
+
+ 	// Toggle visibility for each content div
+ 	for (var i = 0; i < contentDivs.length; i++) {
+ 		var display = contentDivs[i].style.display;
+ 		if (display !== 'none') {
+ 			isContentVisible = true;
+ 		}
+ 		contentDivs[i].style.display = display === 'none' ? 'block' : 'none';
+ 	}
+
+ 	// Update button text based on content visibility
+ 	if (isContentVisible) {
+ 		this.textContent = 'Show File Contents';
+ 	} else {
+ 		this.textContent = 'Hide File Contents';
+ 	}
+ });*/
+
+
+/**
+ * Toggles the visibility of rows in a table based on the match status.
+ * This function assumes that the table has an ID of 'transactionsTable' and that
+ * each row's first cell contains a boolean match status ('true' or 'false').
+ * Rows with 'true' in the first cell are considered matched and will be toggled
+ * between visible and hidden states each time this function is called.
+ */
+ document.getElementById('toggleMatchesButton').addEventListener('click', function() {
+     // Select all row elements from the transactions table
+     const rows = document.querySelectorAll('#transactionsTable tr');
+    
+     // Iterate over each row in the table
+     rows.forEach(row => {
+         // Check if the first cell contains 'true', indicating a match.
+         // Note: This assumes that the match status ('true' or 'false') is in the first cell of each row.
+         if (row.cells.length > 0 && row.cells[3].textContent.trim().toLowerCase() === 'true') {
+             // Toggle the display property between 'none' and an empty string
+             // 'none' hides the row, while an empty string shows it (using default display style)
+             row.style.display = row.style.display === 'none' ? '' : 'none';
+         }
+     });
+
+
+     const paymentRows = document.querySelectorAll('#paymentsTable tr');
+    	 
+     paymentRows.forEach(paymentRows => {
+         // Check if the first cell contains 'true', indicating a match.
+         // Note: This assumes that the match status ('true' or 'false') is in the first cell of each row.
+         if (paymentRows.cells.length > 0 && paymentRows.cells[3].textContent.trim().toLowerCase() === 'true') {
+             // Toggle the display property between 'none' and an empty string
+             // 'none' hides the row, while an empty string shows it (using default display style)
+             paymentRows.style.display = paymentRows.style.display === 'none' ? '' : 'none';
+         }
+     });
+ });
+ 
+ /**
+  * Attaches an event listener to a button to download files from rows with matches.
+  * This function assumes that the table has an ID of 'transactionsTable' and that
+  * the fifth column of each row contains a boolean match status ('true' or 'false').
+  * Rows with 'true' in the fifth column are considered matched.
+  * Each matched row should have a download link with the class '.download-link'.
+  * Clicking the button triggers downloads for all files in rows where the match status is 'true'.
+  */
+ document.getElementById('downloadMatchedFilesButton').addEventListener('click', function() {
+     // Select all row elements from the transactions table
+     const rows = document.querySelectorAll('#transactionsTable tr');
+
+     rows.forEach(row => {
+         // Check if the match status in the fifth column (index 4) is 'true'
+         if (row.cells.length > 3 && row.cells[3].textContent.trim().toLowerCase() === 'true') {
+             // Find the download link in the row and click it to initiate the download
+             const downloadLink = row.querySelector('.download-link');
+             if (downloadLink) {
+                 downloadLink.click();
+             }
+         }
+     });
+ });
+ 
+
+
+ document.getElementById('exportButton').addEventListener('click', function () {
+     exportTableToCSV('#transactionsTable', getTodaysDate() + '_OpenGov_Match_Report.csv');
+	 exportTableToCSV('#paymentsTable', getTodaysDate() + '_Stripe_Match_Report.csv');
+ });
+
+ function getTodaysDate() {
+     const today = new Date();
+     const year = today.getFullYear();
+     const month = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+     const day = String(today.getDate()).padStart(2, '0');
+
+     return `${year}-${month}-${day}`;
+ }
+
+ // Example usage:
+ console.log(getTodaysDate()); // Outputs today's date in YYYY-MM-DD format
+
+
+ function exportTableToCSV(html, filename) {
+     var csv = [];
+     var rows = document.querySelectorAll(html + " tr");
+
+     for (var i = 0; i < rows.length; i++) {
+         var row = [], cols = rows[i].querySelectorAll("td, th");
+
+         for (var j = 0; j < cols.length; j++) 
+             row.push('"' + cols[j].innerText + '"');
+
+         csv.push(row.join(","));        
+     }
+
+     downloadCSV(csv.join("\n"), filename);
+ }
+
+ function downloadCSV(csv, filename) {
+     var csvFile;
+     var downloadLink;
+
+     csvFile = new Blob([csv], {type: "text/csv"});
+     downloadLink = document.createElement("a");
+     downloadLink.download = filename;
+     downloadLink.href = window.URL.createObjectURL(csvFile);
+     downloadLink.style.display = "none";
+     document.body.appendChild(downloadLink);
+     downloadLink.click();
+ }
+
+
+
+
+ function handleDragOver(evt) {
+ 	evt.stopPropagation();
+ 	evt.preventDefault();
+ 	evt.dataTransfer.dropEffect = 'copy';
+ }
+
+
+
+
+ dropZone1 = document.getElementById('dropBox1');
+ //dropZone1.addEventListener('dragover', handleDragOver, false);
+ //dropZone1.addEventListener('drop', handleFileSelect, false);
+ var dropZoneText1 = document.getElementById('dropZone1Text'); // Get the text span
+ var originalText1 = dropZoneText1.textContent; // Store the original text of the span
+
+ dropZone1.addEventListener('dragover', function(e) {
+ 	e.preventDefault(); // Prevent default behavior (Prevent file from being opened)
+ 	dropZone1.style.backgroundColor = 'blue'; // Change background color
+ 	dropZone1.style.color = 'white'; // Change text color
+ 	dropZoneText1.textContent = 'Secure file parsing ready. Drop the file to begin...'; // Change text of the span
+ });
+
+ dropZone1.addEventListener('dragleave', function(e) {
+ 	dropZone1.style.backgroundColor = ''; // Revert background color
+ 	dropZone1.style.color = ''; // Revert text color
+ 	dropZoneText1.textContent = originalText1; // Revert text of the span
+ });
+
+ dropZone1.addEventListener('drop', function(e) {
+ 	dropZone1.style.backgroundColor = 'blue'; // Revert background color
+ 	dropZone1.style.color = 'white'; // Revert text color
+ 	dropZoneText1.textContent = "OpenGov file loaded."; // Revert text of the span
+ });
+
+ dropZone2 = document.getElementById('dropBox2');
+ var dropZoneText2 = document.getElementById('dropZone2Text'); // Get the text span
+ var originalText2 = dropZoneText2.textContent; // Store the original text of the span
+
+ dropZone2.addEventListener('dragover', function(e) {
+ 	e.preventDefault(); // Prevent default behavior (Prevent file from being opened)
+ 	dropZone2.style.backgroundColor = 'green'; // Change background color
+ 	dropZone2.style.color = 'white'; // Change text color
+ 	dropZoneText2.textContent = 'Secure file parsing ready. Drop the file to begin...'; // Change text of the span
+ });
+
+ dropZone2.addEventListener('dragleave', function(e) {
+ 	dropZone2.style.backgroundColor = ''; // Revert background color
+ 	dropZone2.style.color = ''; // Revert text color
+ 	dropZoneText2.textContent = originalText2; // Revert text of the span
+ });
+
+ dropZone2.addEventListener('drop', function(e) {
+ 	dropZone2.style.backgroundColor = 'blue'; // Revert background color
+ 	dropZone2.style.color = 'white'; // Revert text color
+ 	dropZoneText2.textContent = "Stripe file loaded."; // Revert text of the span
+    // Example: Triggering the function directly for demonstration
+    //triggerDisappear();
+ });
+
+ /*
+ function setupDropZones(dropZone, dropZoneText, originalText) {
+ 	
+ 	dropZone.addEventListener('dragover', function(e) {
+ 	    e.preventDefault();  // Prevent default behavior (Prevent file from being opened)
+ 	    dropZone.style.backgroundColor = 'green';  // Change background color
+ 	    dropZone.style.color = 'white';  // Change text color
+ 	    dropZoneText.textContent = 'Secure file parsing ready. Drop the file to begin...';  // Change text of the span
+ 	});
+
+ 	dropZone.addEventListener('dragleave', function(e) {
+ 	    dropZone.style.backgroundColor = '';  // Revert background color
+ 	    dropZone.style.color = '';  // Revert text color
+ 	    dropZoneText.textContent = originalText;  // Revert text of the span
+ 	});							   
+
+ 	dropZone.addEventListener('drop', function(e) {
+ 	    dropZone.style.backgroundColor = '';  // Revert background color
+ 	    dropZone.style.color = '';  // Revert text color
+ 	    dropZoneText.textContent = originalText;  // Revert text of the span
+ 	});
+ }
 	
 	
-	document.getElementById('toggleContentBtn').addEventListener('click', function() {
-	    var contentDivs = document.getElementsByClassName('content-div');
-	    var isContentVisible = false; // Flag to track content visibility
+ setupDropZones(document.getElementById('dropBox1'), 
+ 			   document.getElementById('dropZone1Text'), 
+                document.getElementById('dropZone1Text').textContent);
+ setupDropZones(document.getElementById('dropBox2'), 
+ 			   document.getElementById('dropZone2Text'),
+ 			   document.getElementById('dropZone2Text').textContent);
+ 		  
+ */
 
-	    // Toggle visibility for each content div
-	    for (var i = 0; i < contentDivs.length; i++) {
-	        var display = contentDivs[i].style.display;
-	        if (display !== 'none') {
-	            isContentVisible = true;
-	        }
-	        contentDivs[i].style.display = display === 'none' ? 'block' : 'none';
-	    }
 
-	    // Update button text based on content visibility
-	    if (isContentVisible) {
-	        this.textContent = 'Show File Contents';
-	    } else {
-	        this.textContent = 'Hide File Contents';
-	    }
-	});
-	
-	
-	var dropZone = document.getElementById('dropZone');
-	var dropZoneText = document.getElementById('dropZoneText');  // Get the text span
-	var originalText = dropZoneText.textContent;  // Store the original text of the span
+ function downloadAllFiles() {
+ 	var links = document.querySelectorAll('.download-link');
 
-	dropZone.addEventListener('dragover', function(e) {
-	    e.preventDefault();  // Prevent default behavior (Prevent file from being opened)
-	    dropZone.style.backgroundColor = 'green';  // Change background color
-	    dropZone.style.color = 'white';  // Change text color
-	    dropZoneText.textContent = 'Secure file parsing ready. Drop the file to begin...';  // Change text of the span
-	});
+ 	links.forEach(function(link, index) {
+ 		setTimeout(function() {
+ 			link.click(); // Trigger a click on each link
+ 		}, index * 1000); // Delay subsequent downloads to avoid popup blockers
+ 	});
+ }
 
-	dropZone.addEventListener('dragleave', function(e) {
-	    dropZone.style.backgroundColor = '';  // Revert background color
-	    dropZone.style.color = '';  // Revert text color
-	    dropZoneText.textContent = originalText;  // Revert text of the span
-	});
-
-	dropZone.addEventListener('drop', function(e) {
-	    dropZone.style.backgroundColor = '';  // Revert background color
-	    dropZone.style.color = '';  // Revert text color
-	    dropZoneText.textContent = originalText;  // Revert text of the span
-	});
-
-	
-
-	function downloadAllFiles() {
-	    var links = document.querySelectorAll('.download-link');
-
-	    links.forEach(function(link, index) {
-	        setTimeout(function() {
-	            link.click(); // Trigger a click on each link
-	        }, index * 1000); // Delay subsequent downloads to avoid popup blockers
-	    });
-	}
-
-	// Add this function to a button's click event
-	document.getElementById('downloadAllBtn').addEventListener('click', downloadAllFiles);
-	
+ // Add this function to a button's click event
+ document.getElementById('downloadAllBtn').addEventListener('click', downloadAllFiles);
 	
 	
 </script>
