@@ -322,7 +322,9 @@
 
 <div class="button-container">
     <!--button id="toggleContentBtn" >Show File Contents</button-->
-    <button id="toggleMatchesButton" class="button">Hide/Show Matches</button>
+	<button id="reloadTogglePartials" class="button" onclick="reloadTogglePartials()">Reload toggle Partial Matching on/off</button>
+    
+	<button id="toggleMatchesButton" class="button">Hide/Show Matches</button>
 		<button id="downloadMatchedFilesButton" class="button">Download ONLY MATCHED OpenGov Files</button>	
 	<button id="downloadAllBtn" class="button">Download All OpenGov Files</button>
 
@@ -334,7 +336,8 @@
 
     <h2>Matched Transactions</h2>
     <table id="transactionsTable">
-        <tr>
+
+		<tr>
             <th>OpenGov Date</th>
             <th>Amount</th>
             <th>Match Info</th>
@@ -399,6 +402,8 @@
  var paymentsArray = [];
  
  var oldestTransactionDateNumber = 30000000;
+ 
+ var partialsOn = true;
 
 
  function handleTransactionsFile(evt) {
@@ -443,7 +448,9 @@
  						dateAndGroupID: '',
 						groupType: '',
 						groupName:'',
-						match: false
+						match: false,
+						matchPartial: false
+						
  					};
  				}
 
@@ -575,7 +582,8 @@
 		        date: date,
 				dateNumber: formatDateStringToNumber(date),
 		        amount: Math.abs(amount),
-				match: false
+				match: false,
+				matchPartial: false
 				
 		    }; // Convert amount to positive for matching
 		    //console.log("Read " + date + " " + amount);
@@ -649,10 +657,76 @@
  TODO - Fix visibility.
  */
  
+ function reloadTogglePartials(){
+ 	
+ 
+	 
+     for (let i = 0; i < paymentsArray.length; i++) 
+	 {
+			 paymentsArray[i].match = false;
+			 paymentsArray[i].matchPartial = false;
+			 paymentsArray[i].matchDetail = ''; 
+	 }
+	 
+     for (let i = 0; i < transactionsArray.length; i++) 
+	 {
+			 transactionsArray[i].match = false;
+			 transactionsArray[i].matchPartial = false;
+			 transactionsArray[i].matchDetail = '';
+	 }
+	 
+	 
+	 if (partialsOn == true) {
+		 console.log("Setting partials to FALSE.")
+		 partialsOn = false;
+	 }
+	 else {
+		 console.log("Setting partials to TRUE.")
 
+		 partialsOn = true;
+	 }
+	 
+	 
+	 // Example usage
+	 
+	 
+	 removeNonHeaderRowsByCellType('transactionsTable'); // Replace 'myTableId' with the ID of your table
+	 removeNonHeaderRowsByCellType('paymentsTable');
+	 
+     //populateTransactionMatchTable(transactionsArray);
+     //populatePaymentMatchTable(paymentsArray);
+	 matchTransactionsToPayments();
+	 
+	
+	
+ }
+ function removeNonHeaderRowsByCellType(tableId) {
+     // Get the table by its ID
+     var table = document.getElementById(tableId);
+
+     // Get all rows in the table
+     var rows = table.rows;
+
+     // Iterate backwards through the rows (to avoid index issues when removing rows)
+     for (var i = rows.length - 1; i >= 0; i--) {
+         var row = rows[i];
+
+         // Check if the row contains any 'th' cells
+         var hasHeaderCell = row.querySelector('th') !== null;
+
+         // If the row does not contain a 'th' cell, remove it
+         if (!hasHeaderCell) {
+             row.parentNode.removeChild(row);
+         }
+     }
+ }
+
+
+
+ 
 
  function matchTransactionsToPayments() {
-     //console.log("Starting matchTransactionsToPayments...");
+     console.log("Starting matchTransactionsToPayments...");
 
      // Iterate over all the sorted transactions
      transactionsArray.forEach(function (transaction) {
@@ -681,7 +755,11 @@
 		 }
      });
 
-	 findMatchingPairs(transactionsArray, paymentsArray);
+	 if(partialsOn == true)
+	 {
+		 findMatchingPairs(transactionsArray, paymentsArray);	 	
+	 }
+	 
      populateTransactionMatchTable(transactionsArray);
      populatePaymentMatchTable(paymentsArray);
 	 
@@ -751,6 +829,8 @@
 								 
 								 tArray[i].match = true;
 								 tArray[j].match = true;
+								 tArray[i].matchPartial = true;
+								 tArray[j].matchPartial = true;
 
 								 tArray[i].matchDetail = "<pre>Partial Match for Stripe: " + pArray[x].date + " for " + pArray[x].amount +  " with\n" +
 								                         //"           Transaction 1: " + tArray[i].date + " for " + tArray[i].total + " with \n" +
@@ -761,6 +841,7 @@
 								 						      "       Other Transaction: " + tArray[i].date + " for " + tArray[i].total + "</pre>";
 								 
 								 pArray[x].match = true;
+								 pArray[x].matchPartial = true;
 								 pArray[x].matchDetail = "<pre>Group Match:\n" +
 								                         "           Transaction 1: " + tArray[i].date + " for " + tArray[i].total + " and \n" +
 								 						 "           Transaction 2: " + tArray[j].date + " for " + tArray[j].total + "</pre>";
@@ -1288,6 +1369,9 @@ function formatDateStringToNumber(dateStr) {
      });
  });
  
+
+
+
 
 
  document.getElementById('exportButton').addEventListener('click', function () {
