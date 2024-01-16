@@ -387,7 +387,7 @@
 
 
         <footer class="footer">
-            Town Treasurer Tools v1.02 is made available under the GPL-3.0 license. 
+            Town Treasurer Tools v1.03 is made available under the GPL-3.0 license. 
             <a href="https://github.com/pauljeffrussell/town-treasurer-tools" target="_blank">View the code</a>.
         </footer>
 
@@ -436,8 +436,11 @@
  			//if (lastLine && (lastLine.endsWith('3') || lastLine.endsWith('4'))) {
  			if (lastLine && (getColumnTen(lastLine) == '3' || getColumnTen(lastLine) == '4')) {
 
+
+
  				var date = formatDate(lastLine.split(',')[2]); // Date from the matching row
 
+				//console.log("Recorded Date: " + date);
  				var groupType = getColumnTen(lastLine); // == '3' ? '3' : '4';
  				var amount = parseFloat(line.split(',')[2]) || 0; // Amount from the following row
  				var dateAndGroupID = date + "-" + getColumnTen(lastLine)
@@ -474,7 +477,7 @@
 				dateNumber = formatDateStringToNumber(transactions[dateAndGroupID].date);
 				transactions[dateAndGroupID].dateNumber = dateNumber;
 				
-				console.log("handleTransactionsFile: "+ dateNumber);
+				//console.log("handleTransactionsFile: "+ dateNumber);
 				if (dateNumber != null && dateNumber < oldestTransactionDateNumber) {
 					oldestTransactionDateNumber = dateNumber;
 				}
@@ -571,17 +574,23 @@
 		    var parts = line.split(',');
 			
 			var date = parts[7];
+			
+			
+
 		    if (!date || date.length < 10) {
 		        //console.log('Invalid datetime format. Expected format: YYYY-MM-DD HH:MM. Its fine. just keep going');
 		    }
 			else{
-				date = parts[7].substring(0, 10); //trim off the time
+				date = formatAmericanDateToYYYYMMDD(date);
+				//date = parts[7].substring(0, 10); //trim off the time
 			}
 			
 		    var amount = parseFloat(parts[3]) || 0; // Adjust column index for amount
 
-			//console.log("handleStripeFile paymentNumber: " + formatDateStringToNumber(date));
 
+			
+			console.log("handleStripeFile paymentNumber: " + formatDateStringToNumber(date));
+			
 		    // Use the index as a key in the payments object
 		    payments[index] = {
 		        date: date,
@@ -1247,8 +1256,10 @@ function findMatchingPairs2(firstList, secondList) {
  */
 function formatDateStringToNumber(dateStr) {
     // Validate the input
+	
+	
     if (!dateStr || dateStr.length !== 10 || dateStr.indexOf('-') === -1) {
-        console.log('Invalid date format. Expected format: YYYY-MM-DD.');
+        console.log('Invalid date format. Expected format: YYYY-MM-DD. Got: "' + dateStr + '"' );
         return null;
     }
 
@@ -1256,6 +1267,25 @@ function formatDateStringToNumber(dateStr) {
     return Number(dateStr.replace(/-/g, ''));
 }
 
+
+
+function formatAmericanDateToYYYYMMDD(inputDate) {
+    // Split the input into date and time parts
+    const parts = inputDate.split(' ');
+    const datePart = parts[0];
+    const timePart = parts[1]; // not used in this function, but can be used if needed
+
+    // Split the date part into month, day, and year
+    const dateElements = datePart.split('/');
+
+    // Extract month, day, and year
+    const month = dateElements[0];
+    const day = dateElements[1];
+    const year = dateElements[2];
+
+    // Format the date as YYYYMMDD
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
 
 
 /**
@@ -1269,6 +1299,12 @@ function formatDateStringToNumber(dateStr) {
  * formatDateString("20241301"); // Returns null (invalid date)
  */
  function formatDateString(dateStr) {
+	 
+     if (dateStr.length == 7) 
+	 {
+		 dateStr = "0" + dateStr;
+	 }
+	 
      if (dateStr.length !== 8 || isNaN(dateStr)) {
          console.error('Invalid date format. Expected format: YYYYMMDD.');
          return null;
@@ -1284,6 +1320,11 @@ function formatDateStringToNumber(dateStr) {
 
 // this takes a bonkers format and reorders it.
  function formatDate(dateString) {
+     if (dateString.length == 7) 
+	 {
+		 dateString = "0" + dateString;
+	 } 
+	 
  	var month = dateString.substring(0, 2);
  	var day = dateString.substring(2, 4);
  	var year = dateString.substring(4, 8);
@@ -1399,7 +1440,7 @@ function formatDateStringToNumber(dateStr) {
  }
 
  // Example usage:
- console.log(getTodaysDate()); // Outputs today's date in YYYY-MM-DD format
+// console.log(getTodaysDate()); // Outputs today's date in YYYY-MM-DD format
 
 
  function exportTableToCSV(html, filename) {
