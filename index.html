@@ -1408,18 +1408,32 @@ function formatAmericanDateToYYYYMMDD(inputDate) {
      // Select all row elements from the transactions table
      const rows = document.querySelectorAll('#transactionsTable tr');
 
+	 var index = 0;
      rows.forEach(row => {
          // Check if the match status in the fifth column (index 4) is 'true'
          if (row.cells.length > 3 && row.cells[3].textContent.trim().toLowerCase() === 'true') {
              // Find the download link in the row and click it to initiate the download
              const downloadLink = row.querySelector('.download-link');
              if (downloadLink) {
-                 downloadLink.click();
+		  		setTimeout(function() {
+		  			downloadLink.click(); // Trigger a click on each link
+		  		}, index * 300); // Delay subsequent downloads to avoid popup blockers
+		     index = index + 1;
              }
          }
      });
  });
  
+ 
+ function downloadAllFiles() {
+ 	var links = document.querySelectorAll('.download-link');
+
+ 	links.forEach(function(link, index) {
+ 		setTimeout(function() {
+ 			link.click(); // Trigger a click on each link
+ 		}, index * 300); // Delay subsequent downloads to avoid popup blockers
+ 	});
+ }
 
 
 
