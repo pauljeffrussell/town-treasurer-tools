@@ -387,7 +387,7 @@
 
 
         <footer class="footer">
-            Town Treasurer Tools v1.04 is made available under the GPL-3.0 license. 
+            Town Treasurer Tools v1.05 is made available under the GPL-3.0 license. 
             <a href="https://github.com/pauljeffrussell/town-treasurer-tools" target="_blank">View the code</a>.
         </footer>
 
@@ -469,8 +469,11 @@
 	   	                       };
 	   	                   }*/
 
- 				transactions[dateAndGroupID].lines.push(lastLine + '\n' + line);
- 				//groupData[groupType][date].lines.push(lastLine + '\n' + line);
+ 				//transactions[dateAndGroupID].lines.push(lastLine + '\n' + line);
+ 				transactions[dateAndGroupID].lines.push(lastLine);
+ 				transactions[dateAndGroupID].lines.push(line);
+				
+				//groupData[groupType][date].lines.push(lastLine + '\n' + line);
  				transactions[dateAndGroupID].total += amount;
  				//transactions[dateAndGroupID].date = date;
 				transactions[dateAndGroupID].date = formatDateString(date);
@@ -978,7 +981,8 @@ function findMatchingPairs2(firstList, secondList) {
          
          // Create a download link
          const downloadCell = row.insertCell();
-         const blob = new Blob([transaction.lines.join('\n')], { type: 'text/csv' });
+		 const fileContent = transaction.lines.join('\n') + '\n';
+         const blob = new Blob([fileContent], { type: 'text/csv' });
          const url = URL.createObjectURL(blob);
 		 
 		 var matchText = "_NO_MATCH";
