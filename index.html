@@ -387,7 +387,7 @@
 
 
         <footer class="footer">
-            Town Treasurer Tools v1.05 is made available under the GPL-3.0 license. 
+            Town Treasurer Tools v1.06 is made available under the GPL-3.0 license. 
             <a href="https://github.com/pauljeffrussell/town-treasurer-tools" target="_blank">View the code</a>.
         </footer>
 
@@ -584,8 +584,12 @@
 		        //console.log('Invalid datetime format. Expected format: YYYY-MM-DD HH:MM. Its fine. just keep going');
 		    }
 			else{
-				date = formatAmericanDateToYYYYMMDD(date);
-				//date = parts[7].substring(0, 10); //trim off the time
+				
+				// this was the way to do it ehwne stripe used 01/02/2024 dates
+				//date = formatAmericanDateToYYYYMMDD(date);
+				
+				// but they switched to 2024-01-02
+				date = date.substring(0, 10); //trim off the time
 			}
 			
 		    var amount = parseFloat(parts[3]) || 0; // Adjust column index for amount
