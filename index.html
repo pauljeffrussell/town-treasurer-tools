@@ -409,6 +409,33 @@
  var paymentsFileUploaded = false;
 
 
+
+/**
+ * Handles the processing of an OpenGov Transaction File. This function is triggered by a file drop event.
+ * It validates the file type, reads the content, and parses the transactions to categorize them into
+ * different groups based on the 10th column value ('1', '2', '3', '4'). It also calculates totals and 
+ * keeps track of transactions not added to any group.
+ *
+ * @param {Event} evt - The drop event containing the file to be processed.
+ *
+ * The function performs the following steps:
+ * 1. Prevents the default browser behaviour and stops the propagation of the event.
+ * 2. Validates that a single text file is uploaded. If not, alerts the user.
+ * 3. Creates a FileReader instance to read the uploaded file.
+ * 4. Splits the file content into lines and processes each line.
+ * 5. Tracks the total count of transactions, the count of transactions not added,
+ *    and the count of transactions for groups '3' and '4'.
+ * 6. For each line, if the previous line's 10th column matches '1', '2', '3', or '4',
+ *    parses the transaction data, updates totals, and categorizes the transaction.
+ *    Otherwise, increments the unadded transaction count.
+ * 7. After processing all lines, converts the transaction records into an array, sorts it,
+ *    and triggers UI updates to display transaction metrics and download links.
+ *
+ * Note: The function expects global variables such as `transactions`, `oldestTransactionDateNumber`, and others
+ * to be defined outside its scope for storing and managing transaction data and UI updates.
+ *
+ * Usage: This function is typically attached as an event listener to a file drop area.
+ */
  function handleTransactionsFile(evt) {
  	evt.stopPropagation();
  	evt.preventDefault();
@@ -434,10 +461,9 @@
 
  		lines.forEach(function(line, index) {
  			//if (lastLine && (lastLine.endsWith('3') || lastLine.endsWith('4'))) {
- 			if (lastLine && (getColumnTen(lastLine) == '3' || getColumnTen(lastLine) == '4')) {
-
-
-
+				if (lastLine && (getColumnTen(lastLine) == '1' || getColumnTen(lastLine) == '2' || getColumnTen(lastLine) == '3' || getColumnTen(lastLine) == '4')) {
+				    // code to execute if lastLine is not null and getColumnTen(lastLine) returns '1', '2', '3', or '4'
+			
  				var date = formatDate(lastLine.split(',')[2]); // Date from the matching row
 
 				//console.log("Recorded Date: " + date);
@@ -445,9 +471,11 @@
  				var amount = parseFloat(line.split(',')[2]) || 0; // Amount from the following row
  				var dateAndGroupID = date + "-" + getColumnTen(lastLine)
 
+
  				if (!transactions[dateAndGroupID]) {
  					transactions[dateAndGroupID] = {
  						lines: [],
+						lineData: [],
  						date: '',
 						dateNumber: '',
  						total: 0,
@@ -469,9 +497,21 @@
 	   	                       };
 	   	                   }*/
 
+				const newLineData = {
+				    recordNumber: getColumnZeroIndexed(lastLine,6),
+				    date: formatDateString(date), 
+				    amount: amount,
+					lineText: lastLine + "\n" + line,
+				    match: false
+				};
+
+				console.log(newLineData);
+			
+
  				//transactions[dateAndGroupID].lines.push(lastLine + '\n' + line);
  				transactions[dateAndGroupID].lines.push(lastLine);
  				transactions[dateAndGroupID].lines.push(line);
+				transactions[dateAndGroupID].lineData.push(newLineData);
 				
 				//groupData[groupType][date].lines.push(lastLine + '\n' + line);
  				transactions[dateAndGroupID].total += amount;
@@ -491,12 +531,17 @@
 				transactions[dateAndGroupID].groupType = groupType;
 				
 				if (groupType === '3') {
-					transactions[dateAndGroupID].groupName = "Credit Card";
+					transactions[dateAndGroupID].groupName = "Credit Card (3)";
 				}
 				else if (groupType === '4') {
-					transactions[dateAndGroupID].groupName = "E-Check";
+					transactions[dateAndGroupID].groupName = "E-Check (4)";
 				}
-					
+				else if (groupType === '1') {
+					transactions[dateAndGroupID].groupName = "Check (1)";
+				}
+				else if (groupType === '2') {
+					transactions[dateAndGroupID].groupName = "Cash (2)";
+				}	
 				
  				
 
@@ -787,6 +832,10 @@
      populatePaymentMatchTable(paymentsArray);
 	 
  }
+
+
+
+
 
 /**
  * Finds pairs of numbers in the first list whose sum matches any number in the second list.
@@ -1187,6 +1236,10 @@ function findMatchingPairs2(firstList, secondList) {
 
  function getColumnTen(line) {
  	return line.split(',')[9]
+ }
+ 
+ function getColumnZeroIndexed(line,column){
+ 	return line.split(',')[column]
  }
 
 
